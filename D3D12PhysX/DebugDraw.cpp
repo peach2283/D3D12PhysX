@@ -7,12 +7,12 @@ DebugDraw::DebugDraw()
     cam    = NULL;
     render = NULL;
     
-    boxColor     = PxVec3(0.0f, 0.0f, 1.0f);
-    sphereColor  = PxVec3(1.0f, 0.0f, 0.0f);
-    capsuleColor = PxVec3(0.0f, 1.0f, 0.0f);
-
-    planeColor   = PxVec3(0.89f, 0.89f, 0.89f);  
-    sleepColor   = PxVec3(0.2f, 0.2f, 0.2f);
+    boxColor        = PxVec3(0.0f, 0.0f, 1.0f);
+    sphereColor     = PxVec3(1.0f, 0.0f, 0.0f);
+    capsuleColor    = PxVec3(0.0f, 1.0f, 0.0f);
+    convexMeshColor = PxVec3(1.0f, 0.0f, 1.0f);
+    planeColor      = PxVec3(0.89f, 0.89f, 0.89f);  
+    sleepColor      = PxVec3(0.2f, 0.2f, 0.2f);
 
     vtxGPUBuffer = NULL;
     vtxUPBuffer  = NULL;
@@ -27,7 +27,7 @@ DebugDraw::~DebugDraw()
 void DebugDraw::init()
 {
     ///////디버그용 카메라 생성////////
-    cam = new Camera(0.0f,  3.0f, -5.0f, //카메라 위치
+    cam = new Camera(0.0f,  3.0f, -6.5f, //카메라 위치
                      30.0f, 0.0f, 0.0f);  //카메라 회전
 
     ///////디버그용 렌더러 생성및 초기화////
@@ -96,7 +96,27 @@ void DebugDraw::drawActor(PxRigidActor * actor)
             drawCapsule(capsule.radius, capsule.halfHeight, transform, color);
         }
         else if (geoHolder.getType() == PxGeometryType::eCONVEXMESH) {
-            printf("eCONVEXMESH\n");
+
+            PxConvexMeshGeometry convex;         
+            PxVec3  color;
+
+            const PxU8   * idxBuffer;
+            const PxVec3 * vtxBuffer;
+
+            color = (sleeping == true) ? sleepColor : convexMeshColor;
+
+            shapes[idx]->getConvexMeshGeometry(convex);
+         
+            idxBuffer = convex.convexMesh->getIndexBuffer();
+            vtxBuffer = convex.convexMesh->getVertices();
+
+            for (PxU32 i = 0; i < convex.convexMesh->getNbPolygons(); i++)
+            {
+                PxHullPolygon        data;
+                convex.convexMesh->getPolygonData(i, data);
+
+                drawPolygon(vtxBuffer, &idxBuffer[data.mIndexBase], data.mNbVerts, transform, color);
+           }
         }
         else if (geoHolder.getType() == PxGeometryType::eTRIANGLEMESH) {
             printf("eTRIANGLEMESH\n");
@@ -119,7 +139,6 @@ void DebugDraw::drawActor(PxRigidActor * actor)
         else if (geoHolder.getType() == PxGeometryType::eINVALID) {
             printf("eINVALID\n");
         }
-
     }
 
     ////////////////////////////////
@@ -179,6 +198,24 @@ void DebugDraw::drawLine(const PxVec3& from, const PxVec3& to, const PxVec3& col
 {
     lines.push_back(DebugVertex(from, color));
     lines.push_back(DebugVertex(to, color));
+}
+
+void  DebugDraw::drawPolygon(const PxVec3* vtxBuffer, const PxU8 *idxBuffer, int nvtx, const PxTransform& trans, const PxVec3& color)
+{
+    PxVec3 vtx1;
+    PxVec3 vtx0 = vtxBuffer[idxBuffer[nvtx - 1]];
+
+    vtx0 = trans.transform(vtx0);
+
+    for (int v = 0; v < nvtx; v++)
+    {
+        vtx1 = vtxBuffer[idxBuffer[v]];
+        vtx1 = trans.transform(vtx1);
+
+        drawLine(vtx0, vtx1, color);
+
+        vtx0 = vtx1;
+    }
 }
 
 void DebugDraw::drawSphere(PxReal radius, const PxTransform& trans, const PxVec3& color)

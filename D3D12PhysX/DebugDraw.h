@@ -45,6 +45,8 @@ private:
     PxVec3 planeColor;
     PxVec3 sphereColor;
     PxVec3 capsuleColor;
+    PxVec3 convexMeshColor;
+
     PxVec3 sleepColor;
 
     void drawActor(PxRigidActor * actor);
@@ -59,6 +61,7 @@ private:
     void drawSphere(PxReal radius, const PxTransform& trans, const PxVec3& color);
     void drawTransform(const PxTransform& trans, PxReal orthoLen);
     void drawCapsule(PxReal radius, PxReal halfHeight, const PxTransform& trans, const PxVec3& color);
+    void drawPolygon(const PxVec3* vtxBuffer, const PxU8 *idxBuffer, int nvtx, const PxTransform& trans, const PxVec3& color);
 
 public:
 

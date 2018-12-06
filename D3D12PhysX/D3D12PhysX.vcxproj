@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConvexPrimitive.h" />
     <ClInclude Include="D3D12PhysX.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DebugDraw.h" />
@@ -170,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ConvexPrimitive.cpp" />
     <ClCompile Include="D3D12PhysX.cpp" />
     <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="Device.cpp" />
