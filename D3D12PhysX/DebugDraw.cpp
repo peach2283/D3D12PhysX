@@ -7,10 +7,12 @@ DebugDraw::DebugDraw()
     cam    = NULL;
     render = NULL;
     
-    boxColor        = PxVec3(0.0f, 0.0f, 1.0f);
-    sphereColor     = PxVec3(1.0f, 0.0f, 0.0f);
-    capsuleColor    = PxVec3(0.0f, 1.0f, 0.0f);
-    convexMeshColor = PxVec3(1.0f, 0.0f, 1.0f);
+    boxColor          = PxVec3(0.0f, 0.0f, 1.0f);
+    sphereColor       = PxVec3(1.0f, 0.0f, 0.0f);
+    capsuleColor      = PxVec3(0.0f, 1.0f, 0.0f);
+    convexMeshColor   = PxVec3(1.0f, 0.0f, 1.0f);
+    triangleMeshColor = PxVec3(0.0f, 1.0f, 1.0f);
+
     planeColor      = PxVec3(0.89f, 0.89f, 0.89f);  
     sleepColor      = PxVec3(0.2f, 0.2f, 0.2f);
 
@@ -27,8 +29,8 @@ DebugDraw::~DebugDraw()
 void DebugDraw::init()
 {
     ///////디버그용 카메라 생성////////
-    cam = new Camera(0.0f,  3.0f, -6.5f, //카메라 위치
-                     30.0f, 0.0f, 0.0f);  //카메라 회전
+    cam = new Camera(0.0f,  7.0f, -6.5f, //카메라 위치
+                     45.0f, 0.0f, 0.0f);  //카메라 회전
 
     ///////디버그용 렌더러 생성및 초기화////
     render = new DebugRender();
@@ -119,7 +121,46 @@ void DebugDraw::drawActor(PxRigidActor * actor)
            }
         }
         else if (geoHolder.getType() == PxGeometryType::eTRIANGLEMESH) {
-            printf("eTRIANGLEMESH\n");
+
+            PxTriangleMeshGeometry tri;
+            PxVec3  color;
+            bool    is16Bit;
+
+            const void   * idxBuffer;
+            const PxVec3 * vtxBuffer;
+
+            color = (sleeping == true) ? sleepColor : triangleMeshColor;
+
+            shapes[idx]->getTriangleMeshGeometry(tri);
+
+            vtxBuffer = tri.triangleMesh->getVertices();
+            idxBuffer = tri.triangleMesh->getTriangles();
+            is16Bit   = tri.triangleMesh->getTriangleMeshFlags() & PxTriangleMeshFlag::e16_BIT_INDICES;
+
+            for (PxU32 i = 0; i < tri.triangleMesh->getNbTriangles(); i++)
+            {
+                PxVec3 v0, v1, v2;
+                PxU32  i0, i1, i2;
+
+                if (is16Bit != 0)
+                {
+                    i0 = ((PxU16*)idxBuffer)[i * 3 + 0];
+                    i1 = ((PxU16*)idxBuffer)[i * 3 + 1];
+                    i2 = ((PxU16*)idxBuffer)[i * 3 + 2];
+                }
+                else {
+                    i0 = ((PxU32*)idxBuffer)[i * 3 + 0];
+                    i1 = ((PxU32*)idxBuffer)[i * 3 + 1];
+                    i2 = ((PxU32*)idxBuffer)[i * 3 + 2];
+                }
+
+                v0 = vtxBuffer[i0];
+                v1 = vtxBuffer[i1];
+                v2 = vtxBuffer[i2];
+
+                drawTriangle(v0, v1, v2, transform, color);
+            }
+
         }
         else if (geoHolder.getType() == PxGeometryType::eHEIGHTFIELD) {
             printf("eHEIGHTFIELD\n");
@@ -198,6 +239,17 @@ void DebugDraw::drawLine(const PxVec3& from, const PxVec3& to, const PxVec3& col
 {
     lines.push_back(DebugVertex(from, color));
     lines.push_back(DebugVertex(to, color));
+}
+
+void DebugDraw::drawTriangle(PxVec3 v0, PxVec3 v1, PxVec3 v2, const PxTransform& trans, const PxVec3& color)
+{
+    v0 = trans.transform(v0);
+    v1 = trans.transform(v1);
+    v2 = trans.transform(v2);
+
+    drawLine(v0, v1, color);
+    drawLine(v1, v2, color);
+    drawLine(v2, v0, color);
 }
 
 void  DebugDraw::drawPolygon(const PxVec3* vtxBuffer, const PxU8 *idxBuffer, int nvtx, const PxTransform& trans, const PxVec3& color)

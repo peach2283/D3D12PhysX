@@ -46,6 +46,7 @@ private:
     PxVec3 sphereColor;
     PxVec3 capsuleColor;
     PxVec3 convexMeshColor;
+    PxVec3 triangleMeshColor;
 
     PxVec3 sleepColor;
 
@@ -62,6 +63,7 @@ private:
     void drawTransform(const PxTransform& trans, PxReal orthoLen);
     void drawCapsule(PxReal radius, PxReal halfHeight, const PxTransform& trans, const PxVec3& color);
     void drawPolygon(const PxVec3* vtxBuffer, const PxU8 *idxBuffer, int nvtx, const PxTransform& trans, const PxVec3& color);
+    void drawTriangle(PxVec3 v0, PxVec3 v1, PxVec3 v2, const PxTransform& trans, const PxVec3& color);
 
 public:
 
