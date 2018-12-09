@@ -47,6 +47,7 @@ private:
     PxVec3 capsuleColor;
     PxVec3 convexMeshColor;
     PxVec3 triangleMeshColor;
+    PxVec3 heightFieldColor;
 
     PxVec3 sleepColor;
 

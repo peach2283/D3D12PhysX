@@ -12,7 +12,7 @@ DebugDraw::DebugDraw()
     capsuleColor      = PxVec3(0.0f, 1.0f, 0.0f);
     convexMeshColor   = PxVec3(1.0f, 0.0f, 1.0f);
     triangleMeshColor = PxVec3(0.0f, 1.0f, 1.0f);
-
+    heightFieldColor  = PxVec3(0.89f, 0.89f, 0.89f);
     planeColor      = PxVec3(0.89f, 0.89f, 0.89f);  
     sleepColor      = PxVec3(0.2f, 0.2f, 0.2f);
 
@@ -29,8 +29,8 @@ DebugDraw::~DebugDraw()
 void DebugDraw::init()
 {
     ///////디버그용 카메라 생성////////
-    cam = new Camera(0.0f,  7.0f, -6.5f, //카메라 위치
-                     45.0f, 0.0f, 0.0f);  //카메라 회전
+    cam = new Camera(0.0f,  30.0f, -70.5f, //카메라 위치
+                     30.0f, 0.0f, 0.0f);  //카메라 회전
 
     ///////디버그용 렌더러 생성및 초기화////
     render = new DebugRender();
@@ -163,7 +163,79 @@ void DebugDraw::drawActor(PxRigidActor * actor)
 
         }
         else if (geoHolder.getType() == PxGeometryType::eHEIGHTFIELD) {
-            printf("eHEIGHTFIELD\n");
+
+            PxHeightFieldGeometry heightFieldGeom;
+            PxHeightField* heightField;
+
+            shapes[idx]->getHeightFieldGeometry(heightFieldGeom);
+            heightField = heightFieldGeom.heightField;
+
+            int cols = heightField->getNbColumns();
+            int rows = heightField->getNbRows();
+
+            float heightScale = heightFieldGeom.heightScale;
+            float rowScale    = heightFieldGeom.rowScale;
+            float colScale    = heightFieldGeom.columnScale;
+
+            for (int c = 0; c < cols - 1; c++)
+            {
+                for (int r = 0; r < rows - 1; r++)
+                {
+                    float x0 = (r + 0)* rowScale;
+                    float x1 = (r + 1)* rowScale;
+
+                    float z0 = (c + 0)* colScale;
+                    float z1 = (c + 1)* colScale;
+
+                    float y00 = heightField->getHeight(r + 0.0f, c + 0.0f) * heightScale;
+                    float y10 = heightField->getHeight(r + 1.0f, c + 0.0f) * heightScale;
+                    float y01 = heightField->getHeight(r + 0.0f, c + 1.0f) * heightScale;
+
+                    drawTriangle(PxVec3(x0, y00, z0), PxVec3(x1, y10, z0), PxVec3(x0, y01, z1), transform, heightFieldColor);
+
+                    if (r == rows - 2) 
+                    {
+                        float y11 = heightField->getHeight(r + 1.0f, c + 1.0f) * heightScale;
+
+                        PxVec3 from=transform.transform(PxVec3(x1, y10, z0));
+                        PxVec3 to  =transform.transform(PxVec3(x1, y11, z1));
+
+                        drawLine(from, to, heightFieldColor);
+                    }
+
+                    if (c == cols - 2)
+                    {
+                        float y11 = heightField->getHeight(r + 1.0f, c + 1.0f) * heightScale;
+
+                        PxVec3 from = transform.transform(PxVec3(x0, y01, z1));
+                        PxVec3 to   = transform.transform(PxVec3(x1, y11, z1));
+
+                        drawLine(from, to, heightFieldColor);
+                    }
+
+                   /****************************************************************
+                    float z00 = (c +0)* colScale;
+                    float x00 = (r +0)* rowScale;
+                    float y00 = heightField->getHeight(r+0, c+0) * heightScale;
+
+                    float z10 = (c+0) * colScale;
+                    float x10 = (r+1) * rowScale;
+                    float y10 = heightField->getHeight(r+1, c+0) * heightScale;
+
+                    float z01 = (c + 1) * colScale;
+                    float x01 = (r + 0) * rowScale;
+                    float y01 = heightField->getHeight(r + 0, c+1) * heightScale;
+
+                    float z11 = (c+1) * colScale;
+                    float x11 = (r+1) * rowScale;
+                    float y11 = heightField->getHeight(r+1, c+1) * heightScale;
+
+                    drawTriangle(PxVec3(x00, y00, z00), PxVec3(x10, y10, z10), PxVec3(x01, y01, z01), transform, heightFieldColor);
+                   // drawTriangle(PxVec3(x00, y00, z00), PxVec3(x10, y10, z10), PxVec3(x01, y01, z01), transform, heightFieldColor);
+                   *************************************************************/
+                }
+            }
+
         }
         else if (geoHolder.getType() == PxGeometryType::ePLANE) {
            

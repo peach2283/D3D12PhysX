@@ -161,6 +161,7 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="HeightField.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="PhysxLibs.h" />
     <ClInclude Include="DebugRender.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="D3D12PhysX.cpp" />
     <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="HeightField.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="stdafx.cpp">
